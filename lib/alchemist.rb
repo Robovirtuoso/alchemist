@@ -1,3 +1,5 @@
+require 'ostruct'
+
 require_relative 'alchemist/recipe_book'
 require_relative 'alchemist/recipe'
 require_relative 'alchemist/transmutation'

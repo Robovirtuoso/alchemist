@@ -4,21 +4,38 @@ module Alchemist
 
     class SourceMethod
 
-      def initialize(method, &block)
-        @method = method
-        @block  = block
+      def initialize(source_method, *result_methods, &block)
+        @source_method  = source_method
+        @result_methods = result_methods
+        @block          = block
       end
 
       def call(source, result)
-        result.instance_exec(source_value(source), &@block)
+        @source = source
+
+        @result_methods.each do |result_method|
+          Transfer.new(:value, result_method).call(source_struct, result)
+        end
       end
 
       private
 
-      def source_value(source)
-        source.public_send(@method)
+      def source_struct
+        @source_struct ||= OpenStruct.new(value: value)
+      end
+
+      def value
+        block_value || source_value
+      end
+
+      def block_value
+        @block.call(source_value) if @block
+      end
+
+      def source_value
+        @source.public_send(@source_method)
       rescue NoMethodError
-        raise Errors::InvalidSourceMethod.new(@method)
+        raise Errors::InvalidSourceMethod.new(@source_method)
       end
 
     end

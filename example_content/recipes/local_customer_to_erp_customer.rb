@@ -10,13 +10,4 @@ Alchemist::RecipeBook.write LocalCustomer, ErpCustomer do
 
   transfer :email, :email_address
 
-  source_method :user_events do |user_events|
-    user_events.map do |event|
-      datetime = "#{event.date} #{event.time}"
-      erp_event = ErpEvent.new(event.type, datetime, 'Created by Alchemist')
-
-      self.event_log << erp_event
-    end
-  end
-
 end

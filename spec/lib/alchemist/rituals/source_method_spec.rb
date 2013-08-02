@@ -2,34 +2,77 @@ require 'spec_helper'
 
 describe Alchemist::Rituals::SourceMethod do
 
-  let(:result_object) { OpenStruct.new(rank: 'Private') }
+  let(:result) { OpenStruct.new(rank: 'Private') }
 
-  let(:block)         { Proc.new { |method| self.rank = method } }
-  let(:source_method) { Alchemist::Rituals::SourceMethod.new(method, &block) }
+  let(:result_method1) { :method1 }
+  let(:result_method2) { :method2 }
+
+  before do
+    result.stub(result_method1)
+    result.stub(result_method2)
+  end
 
   context "a valid source object field is given" do
 
-    let(:method)        { :rank }
-    let(:source_object) { OpenStruct.new(rank: 'Colonel') }
+    let(:source_method) { :rank }
+    let(:source_value)  { 'Colonel' }
 
-    it "receives the appropriate block and arguments" do
-      result_object.should_receive(:instance_exec)
-        .with(source_object.rank, &block)
-        .and_call_original
-      source_method.call(source_object, result_object)
+    let(:source) { OpenStruct.new(rank: source_value) }
+
+    context "no block is given" do
+
+      let(:ritual) {
+        Alchemist::Rituals::SourceMethod.new(source_method, result_method1, result_method2)
+      }
+
+      it 'calls the first result method with the result of the source method' do
+        result.should_receive(result_method1).with(source_value)
+        ritual.call(source, result)
+      end
+
+      it 'calls the second result method with the result of the source method' do
+        result.should_receive(result_method2).with(source_value)
+        ritual.call(source, result)
+      end
+
+    end
+
+    context "a block is given" do
+
+      let(:block) { Proc.new { |value| value.downcase } }
+
+      let(:ritual) {
+        Alchemist::Rituals::SourceMethod.new(source_method, result_method1, result_method2, &block)
+      }
+
+      it 'calls the first result method with the result of the block' do
+        result.should_receive(result_method1).with(source_value.downcase)
+        ritual.call(source, result)
+      end
+
+      it 'calls the second result method with the result of the block' do
+        result.should_receive(result_method1).with(source_value.downcase)
+        ritual.call(source, result)
+      end
+
     end
 
   end
 
   context "an invalid source object field is given" do
 
-    let(:method)        { :invalid_field }
-    let(:source_object) { Class.new }
+    let(:source_method) { :invalid_field }
+
+    let(:source) { Class.new }
 
     let(:expected_error) { Alchemist::Errors::InvalidSourceMethod }
 
+    let(:ritual) {
+      Alchemist::Rituals::SourceMethod.new(source_method, result_method1, result_method2)
+    }
+
     it "raises an InvalidSourceMethod" do
-      expect { source_method.call(source_object, result_object) }.to raise_error(expected_error)
+      expect { ritual.call(source, result) }.to raise_error(expected_error)
     end
 
   end
