@@ -52,14 +52,37 @@ describe Alchemist::Rituals::Transfer do
 
     context "no block is given" do
 
-      let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field) }
+      context "target method is a mutator" do
 
-      before do
-        transfer.call(source, result)
+        let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field) }
+
+        before do
+          transfer.call(source, result)
+        end
+
+        it "updates the value of 'header' to the value of 'title'" do
+          expect(result.header).to eq(source.title)
+        end
+
       end
 
-      it "updates the value of 'header' to the value of 'title'" do
-        expect(result.header).to eq(source.title)
+      context "target method is not a mutator" do
+
+        let(:datetime_string)  { Time.now.to_s }
+        let(:alt_source_field) { :datetime }
+        let(:alt_result_field) { :parse_datetime }
+
+        let(:transfer) { Alchemist::Rituals::Transfer.new(alt_source_field, alt_result_field) }
+
+        before do
+          source.stub(:datetime) { datetime_string }
+        end
+
+        it "calls the target method with the result of source_field" do
+          result.should_receive(alt_result_field).with(datetime_string)
+          transfer.call(source, result)
+        end
+
       end
 
     end
@@ -67,16 +90,34 @@ describe Alchemist::Rituals::Transfer do
     context "a block is given" do
 
       let(:block) { Proc.new { |value| value.upcase } }
-      let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field, &block) }
 
       let(:expected_string) { source.title.upcase }
 
-      before do
-        transfer.call(source, result)
+      context "target method is a mutator" do
+
+        let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field, &block) }
+
+        before do
+          transfer.call(source, result)
+        end
+
+        it "updates the value of 'header' and executes the corresponding block" do
+          expect(result.header).to eq(expected_string)
+        end
+
       end
 
-      it "updates the value of 'header' and executes the corresponding block" do
-        expect(result.header).to eq(expected_string)
+      context "target method is not a mutator" do
+
+        let(:alt_result_method) { :parse_arbitrary_string }
+
+        let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, alt_result_method, &block) }
+
+        it "calls the target method with the result of the block" do
+          result.should_receive(alt_result_method).with(expected_string)
+          transfer.call(source, result)
+        end
+
       end
 
     end
@@ -97,9 +138,9 @@ describe Alchemist::Rituals::Transfer do
 
     let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field) }
 
-    let(:expected_error) { Alchemist::Errors::NoResultFieldForTransfer }
+    let(:expected_error) { Alchemist::Errors::InvalidResultMethodForTransfer }
 
-    it "should raise a NoResultFieldForTransfer exception" do
+    it "should raise a InvalidResultMethodForTransfer exception" do
       expect { transfer.call(source, result) }.to raise_error(expected_error)
     end
 

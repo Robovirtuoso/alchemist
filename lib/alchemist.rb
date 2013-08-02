@@ -12,7 +12,7 @@ require_relative 'alchemist/errors/transmutation_error'
 require_relative 'alchemist/errors/guard_failure'
 require_relative 'alchemist/errors/invalid_transmutation_method'
 require_relative 'alchemist/errors/no_target_received'
-require_relative 'alchemist/errors/no_result_field_for_transfer'
+require_relative 'alchemist/errors/invalid_result_method_for_transfer'
 require_relative 'alchemist/errors/invalid_source_method'
 
 module Alchemist
