@@ -4,6 +4,10 @@ Alchemist::RecipeBook.write LocalCustomer, ErpCustomer do
     ErpCustomer.new
   end
 
+  source_method :full_name do |full|
+    self.name = full
+  end
+
   transfer :order_count, :orders do |order_count|
     order_count.to_s
   end

@@ -13,8 +13,15 @@ describe Alchemist do
   let(:type)        { 'Customer' }
   let(:date)        { Date.today }
   let(:time)        { Time.now }
-  let(:user_event)  { UserEvent.new(type, date, time) }
   let(:datetime)    { "#{date} #{time}" }
+
+  let(:user_event) do
+    UserEvent.new.tap do |event|
+      event.type = type
+      event.date = date
+      event.time = time
+    end
+  end
 
   describe "LocalCustomer to ErpCustomer" do
 
@@ -32,8 +39,8 @@ describe Alchemist do
 
       let(:transmute) { Alchemist.transmute(local, ErpCustomer) }
 
-      pending "sets 'first_name' and 'last_name' to 'name'" do
-        # expect(transmute.name).to eq(local.full_name)
+      it "sets 'first_name' and 'last_name' to 'name'" do
+        expect(transmute.name).to eq(local.full_name)
       end
 
       it "sets 'order_count' to 'order'" do

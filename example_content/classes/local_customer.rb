@@ -19,9 +19,9 @@ end
 
 class UserEvent
 
-  attr_reader :type, :date, :time
+  attr_accessor :type, :date, :time
 
-  def initialize(type, date, time)
+  def initialize
     @type = type
     @date = date || Date.today
     @time = time || Time.now

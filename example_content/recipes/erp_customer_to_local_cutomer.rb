@@ -1,5 +1,3 @@
-require 'time'
-
 Alchemist::RecipeBook.write ErpCustomer, LocalCustomer do
 
   result {
@@ -13,12 +11,11 @@ Alchemist::RecipeBook.write ErpCustomer, LocalCustomer do
   transfer :email_address, :email
 
   source_method :event_log do |event_log|
-    event_log.each do |event|
-      date = Date.parse(event.datetime.split(' ', 2).first)
-      time = Time.parse(event.datetime)
-
-      self.user_events << UserEvent.new(event.name, date, time)
+    user_events = event_log.map do |event|
+      Alchemist.transmute(event, UserEvent)
     end
+
+    self.user_events.concat(user_events)
   end
 
 end

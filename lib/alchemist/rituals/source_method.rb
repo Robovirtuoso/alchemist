@@ -4,18 +4,15 @@ module Alchemist
 
     class SourceMethod
 
-      def initialize(source_method, *result_methods, &block)
+      def initialize(source_method, &block)
         @source_method  = source_method
-        @result_methods = result_methods
         @block          = block
       end
 
       def call(source, result)
         @source = source
 
-        @result_methods.each do |result_method|
-          Transfer.new(:value, result_method).call(source_struct, result)
-        end
+        result.instance_exec(source_value, &@block)
       end
 
       private
