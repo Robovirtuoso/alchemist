@@ -49,19 +49,4 @@ describe Alchemist::Recipe do
 
   end
 
-  describe '#source_methods' do
-
-    let(:source_method) { :albatross }
-    let(:block) { Proc.new { |value| value.to_s } }
-
-    before do
-      recipe.source_method(source_method, &block)
-    end
-
-    it 'adds an instance of Alchemist::Rituals::SourceMethod to an array' do
-      expect(recipe.source_methods.first).to be_kind_of(Alchemist::Rituals::SourceMethod)
-    end
-
-  end
-
 end

@@ -12,13 +12,15 @@ describe Alchemist::Rituals::Transfer do
     let(:source) { OpenStruct.new(title: source_string) }
     let(:result) { OpenStruct.new(title: result_string) }
 
+    let(:context) { Alchemist::Context.new(source, result) }
+
     context "no block is given" do
 
       let(:transfer) { Alchemist::Rituals::Transfer.new(source_field) }
 
 
       it "updates the value of 'title' on the result object" do 
-        expect { transfer.call(source, result) }.to change { result.title }.to(source_string)
+        expect { transfer.call(context) }.to change { result.title }.to(source_string)
       end
 
     end
@@ -31,7 +33,7 @@ describe Alchemist::Rituals::Transfer do
       let(:expected_string) { source_string.downcase.strip }
 
       before do
-        transfer.call(source, result)
+        transfer.call(context)
       end
 
       it "executes the block on the given field" do
@@ -50,6 +52,8 @@ describe Alchemist::Rituals::Transfer do
     let(:source) { OpenStruct.new(title: 'Source Title!') }
     let(:result) { OpenStruct.new(header: 'Header Title!') }
 
+    let(:context) { Alchemist::Context.new(source, result) }
+
     context "no block is given" do
 
       context "target method is a mutator" do
@@ -57,7 +61,7 @@ describe Alchemist::Rituals::Transfer do
         let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field) }
 
         before do
-          transfer.call(source, result)
+          transfer.call(context)
         end
 
         it "updates the value of 'header' to the value of 'title'" do
@@ -80,7 +84,7 @@ describe Alchemist::Rituals::Transfer do
 
         it "calls the target method with the result of source_field" do
           result.should_receive(alt_result_field).with(datetime_string)
-          transfer.call(source, result)
+          transfer.call(context)
         end
 
       end
@@ -98,7 +102,7 @@ describe Alchemist::Rituals::Transfer do
         let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field, &block) }
 
         before do
-          transfer.call(source, result)
+          transfer.call(context)
         end
 
         it "updates the value of 'header' and executes the corresponding block" do
@@ -115,7 +119,7 @@ describe Alchemist::Rituals::Transfer do
 
         it "calls the target method with the result of the block" do
           result.should_receive(alt_result_method).with(expected_string)
-          transfer.call(source, result)
+          transfer.call(context)
         end
 
       end
@@ -136,12 +140,14 @@ describe Alchemist::Rituals::Transfer do
     let(:source) { OpenStruct.new(body: 'All the details of the report') }
     let(:result) { ResultReport.new }
 
+    let(:context) { Alchemist::Context.new(source, result) }
+
     let(:transfer) { Alchemist::Rituals::Transfer.new(source_field, result_field) }
 
     let(:expected_error) { Alchemist::Errors::InvalidResultMethodForTransfer }
 
     it "should raise a InvalidResultMethodForTransfer exception" do
-      expect { transfer.call(source, result) }.to raise_error(expected_error)
+      expect { transfer.call(context) }.to raise_error(expected_error)
     end
 
   end

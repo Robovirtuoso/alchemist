@@ -10,8 +10,10 @@ module Alchemist
     end
 
     def process
-      recipe.rituals.each { |ritual| ritual.call(source, result) }
+      recipe.rituals.each { |ritual| ritual.call(context) }
     end
+
+    private
 
     def source_type
       @source.class
@@ -23,6 +25,10 @@ module Alchemist
 
     def recipe
       @recipe ||= RecipeBook.lookup(source_type, result_type)
+    end
+
+    def context
+      @context ||= Context.new(source, recipe.get_result)
     end
 
   end

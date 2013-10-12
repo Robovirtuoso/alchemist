@@ -13,10 +13,9 @@ module Alchemist
         @block        = block
       end
 
-      def call(source, result)
-        @source = source
-        method  = target_method(result)
-        result.public_send(method, argument)
+      def call(context)
+        @context = context
+        @context.result.public_send(target_method, argument)
       rescue NoMethodError, ArgumentError
         raise Errors::InvalidResultMethodForTransfer.new(@result_field)
       end
@@ -32,11 +31,11 @@ module Alchemist
       end
 
       def source_value
-        @source.public_send(@source_field)
+        @context.source.public_send(@source_field)
       end
 
-      def target_method(result)
-        if result.respond_to?(result_mutator)
+      def target_method
+        if @context.result.respond_to?(result_mutator)
           result_mutator
         else
           result_method

@@ -37,10 +37,6 @@ module Alchemist
       @transfers << Rituals::Transfer.new(source_field, target_field, &block)
     end
 
-    def source_method(method_name, &block)
-      @source_methods << Rituals::SourceMethod.new(method_name, &block)
-    end
-
   end
 
 end
